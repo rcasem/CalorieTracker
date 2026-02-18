@@ -10,14 +10,14 @@
         :root { 
             --bg: #F2F2F7; --card: #FFFFFF; --text: #000000; 
             --primary: #34C759; --danger: #FF3B30; --border: #E5E5EA; --accent: #007AFF;
-            --pill: rgba(142, 142, 147, 0.15);
+            --water: #007AFF; --pill: rgba(142, 142, 147, 0.15);
         }
         [data-theme="dark"] { 
             --bg: #000000; --card: #1C1C1E; --text: #FFFFFF; --border: #38383A;
             --pill: rgba(255, 255, 255, 0.15);
         }
 
-        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; transition: 0.3s; padding-bottom: 100px; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; transition: 0.3s; padding-bottom: 120px; }
         
         /* Navigation Bar */
         .nav-bar { 
@@ -26,7 +26,7 @@
             display: flex; justify-content: space-around; align-items: center;
             padding-bottom: env(safe-area-inset-bottom); z-index: 100;
         }
-        .nav-item { border: none; background: none; color: #8E8E93; font-size: 11px; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .nav-item { border: none; background: none; color: #8E8E93; font-size: 11px; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
         .nav-item.active { color: var(--accent); }
         .nav-icon { font-size: 24px; }
 
@@ -34,46 +34,49 @@
         .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Typography & Header */
-        h1 { margin: 0 0 15px 0; font-size: 28px; font-weight: 800; }
-        .card { background: var(--card); padding: 20px; border-radius: 24px; border: 1px solid var(--border); margin-bottom: 12px; }
+        .tab-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        h1 { margin: 0; font-size: 28px; font-weight: 800; }
+        
+        .card { background: var(--card); padding: 20px; border-radius: 24px; border: 1px solid var(--border); margin-bottom: 12px; position: relative; }
 
-        /* Summary Header */
+        /* Summary & Progress */
         .summary-header { display: flex; justify-content: space-between; align-items: flex-start; }
-        .target-column { display: flex; flex-direction: column; align-items: flex-end; }
-        .goal-container { 
-            display: flex; align-items: center; background: var(--pill); 
-            padding: 8px 12px; border-radius: 14px; margin-top: 4px;
-        }
-        .goal-input-minimal { background: transparent; border: none; color: var(--text); font-size: 17px; font-weight: 700; width: 70px; text-align: center; outline: none; }
-
-        /* Progress & Chart */
+        .target-column { display: flex; flex-direction: column; align-items: flex-end; flex: 1; }
         .progress-container { width: 100%; background: var(--border); border-radius: 10px; height: 10px; overflow: hidden; margin-top: 25px; }
         #progressBar { height: 100%; width: 0%; background: var(--primary); transition: 0.6s; }
+        
+        /* Water Styling */
+        .water-container { display: flex; justify-content: space-between; align-items: center; }
+        .water-stats { flex: 1; }
+        .water-btns { display: flex; gap: 8px; }
+        .btn-water { background: var(--pill); border: none; color: var(--water); padding: 12px; border-radius: 16px; font-weight: 800; font-size: 13px; cursor: pointer; }
+        .water-progress-mini { width: 100%; background: var(--border); height: 6px; border-radius: 3px; margin-top: 10px; overflow: hidden; }
+        #waterBar { height: 100%; width: 0%; background: var(--water); transition: 0.6s; }
+
+        /* Chart */
         .chart-container { display: flex; justify-content: space-between; align-items: flex-end; height: 80px; margin-top: 15px; }
         .chart-column { display: flex; flex-direction: column; align-items: center; flex: 1; gap: 8px; }
         .chart-bar { width: 12px; background: var(--pill); border-radius: 6px; transition: height 0.4s; }
 
-        /* Inputs & Buttons */
+        /* Inputs */
         .form-row { display: flex; gap: 8px; margin-bottom: 8px; }
-        select, input { width: 100%; padding: 14px; border: none; border-radius: 14px; font-size: 16px; background: var(--bg); color: var(--text); outline: none; }
-        .btn-main { width: 100%; background: var(--primary); color: white; border: none; padding: 16px; border-radius: 16px; font-weight: 700; font-size: 16px; margin-top: 8px; }
+        select, input { width: 100%; padding: 14px; border: none; border-radius: 14px; font-size: 16px; background: var(--bg); color: var(--text); outline: none; box-sizing: border-box; }
+        .btn-main { width: 100%; background: var(--primary); color: white; border: none; padding: 16px; border-radius: 16px; font-weight: 700; font-size: 16px; margin-top: 8px; cursor: pointer; }
 
-        /* History */
-        .meal-group-header { font-size: 11px; font-weight: 800; color: var(--accent); text-transform: uppercase; margin: 15px 0 8px 5px; }
-        .history-item { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 14px 18px; border-radius: 18px; margin-bottom: 8px; border: 1px solid var(--border); }
-        .delete-btn { color: var(--danger); font-size: 20px; font-weight: bold; background: none; border: none; }
+        .goal-input-card { position: relative; margin-top: 10px; }
+        .unit-label { position: absolute; right: 15px; top: 14px; font-weight: 700; color: #8E8E93; pointer-events: none; }
 
-        /* Settings List */
-        .settings-row { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--border); }
+        .theme-toggle-btn { background: var(--pill); border: none; width: 36px; height: 36px; border-radius: 50%; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .settings-row { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--border); cursor: pointer; }
         .settings-row:last-child { border: none; }
         .danger-text { color: var(--danger); font-weight: 700; }
+        .label-small { font-size: 11px; font-weight: 800; color: #8E8E93; text-transform: uppercase; margin-bottom: 4px; display: block; }
     </style>
 </head>
 <body>
 
     <div id="home" class="tab-content active">
-        <h1>Summary</h1>
+        <div class="tab-header"><h1>Summary</h1></div>
         
         <div class="card">
             <div class="summary-header">
@@ -86,14 +89,32 @@
                 </div>
                 <div class="target-column">
                     <div style="display:flex; justify-content: space-between; align-items: center; width:100%; gap:10px;">
-                        <button class="nav-btn" onclick="changeDate(-1)" style="background:none; border:none; color:var(--accent); font-weight:900;">❮</button>
+                        <button onclick="changeDate(-1)" style="background:none; border:none; color:var(--accent); font-weight:900; cursor:pointer;">❮</button>
                         <span id="displayDate" style="font-weight:800; font-size:14px;">Today</span>
-                        <button class="nav-btn" onclick="changeDate(1)" style="background:none; border:none; color:var(--accent); font-weight:900;">❯</button>
+                        <button onclick="changeDate(1)" style="background:none; border:none; color:var(--accent); font-weight:900; cursor:pointer;">❯</button>
                     </div>
                     <div class="progress-container" style="margin-top:15px;"><div id="progressBar"></div></div>
                 </div>
             </div>
             <div class="chart-container" id="weeklyChart"></div>
+        </div>
+
+        <div class="card">
+            <div class="water-container">
+                <div class="water-stats">
+                    <span class="label-small" style="color:var(--water)">Water Intake</span>
+                    <div style="display: flex; align-items: baseline;">
+                        <span id="waterConsumed" style="font-size: 24px; font-weight: 800;">0</span>
+                        <span style="font-size: 14px; font-weight: 600; color: #8E8E93; margin-left: 4px;">/ <span id="waterGoalLabel">2000</span>ml</span>
+                    </div>
+                </div>
+                <div class="water-btns">
+                    <button class="btn-water" onclick="addWater(250)">+250ml</button>
+                    <button class="btn-water" onclick="addWater(500)">+500ml</button>
+                    <button class="btn-water" onclick="addWater(-250)" style="opacity:0.5">↺</button>
+                </div>
+            </div>
+            <div class="water-progress-mini"><div id="waterBar"></div></div>
         </div>
 
         <div class="card">
@@ -104,62 +125,51 @@
             <input type="text" id="foodName" placeholder="Whats your meal today?">
             <button id="addBtn" class="btn-main" onclick="addEntry()">Log Entry</button>
         </div>
-
         <div id="historyList"></div>
     </div>
 
     <div id="settings" class="tab-content">
-        <h1>Settings</h1>
+        <div class="tab-header">
+            <h1>Settings</h1>
+            <button onclick="toggleTheme()" class="theme-toggle-btn" id="themeBtn">🌙</button>
+        </div>
         
         <div class="card">
-            <div class="settings-row">
-                <span>Daily Goal</span>
-                <div class="goal-container">
-                    <input type="number" id="goalInput" class="goal-input-minimal" oninput="updateGoal(this.value)">
-                    <span style="font-size: 12px; font-weight: 700;">kcal</span>
-                </div>
+            <span class="label-small">Daily Calorie Goal</span>
+            <div class="goal-input-card">
+                <input type="number" id="goalInput" placeholder="Set kcal target" oninput="updateGoal(this.value)">
+                <span class="unit-label">kcal</span>
             </div>
-            <div class="settings-row">
-                <span>Dark Mode</span>
-                <button onclick="toggleTheme()" class="nav-btn" id="themeBtn" style="background:var(--pill); border:none; width:40px; height:40px; border-radius:50%; font-size:18px;">🌙</button>
+            <div style="margin-top:20px;"></div>
+            <span class="label-small">Daily Water Goal</span>
+            <div class="goal-input-card">
+                <input type="number" id="waterGoalInput" placeholder="Set ml target" oninput="updateWaterGoal(this.value)">
+                <span class="unit-label">ml</span>
             </div>
         </div>
 
         <div class="card">
             <h3 style="margin-top:0; font-size:14px; color:#8E8E93;">DATA MANAGEMENT</h3>
-            <div class="settings-row" onclick="exportData()">
-                <span>Export Backup (.json)</span>
-                <span style="color:var(--accent); font-weight:700;">💾 Export</span>
-            </div>
-            <div class="settings-row" onclick="document.getElementById('fileInput').click()">
-                <span>Restore from File</span>
-                <span style="color:var(--accent); font-weight:700;">📂 Upload</span>
-            </div>
-            <div class="settings-row" onclick="clearData()">
-                <span class="danger-text">Clear All Data</span>
-            </div>
+            <div class="settings-row" onclick="exportData()"><span>Export Backup (.json)</span><span style="color:var(--accent); font-weight:700;">Export</span></div>
+            <div class="settings-row" onclick="document.getElementById('fileInput').click()"><span>Import Backup</span><span style="color:var(--accent); font-weight:700;">Upload</span></div>
+            <div class="settings-row" onclick="clearData()"><span class="danger-text">Clear All Data</span></div>
         </div>
         <input type="file" id="fileInput" style="display:none" onchange="importData(event)" accept=".json">
     </div>
 
     <nav class="nav-bar">
-        <button class="nav-item active" onclick="switchTab('home', this)">
-            <span class="nav-icon">🏠</span>
-            <span>Home</span>
-        </button>
-        <button class="nav-item" onclick="switchTab('settings', this)">
-            <span class="nav-icon">⚙️</span>
-            <span>Settings</span>
-        </button>
+        <button class="nav-item active" onclick="switchTab('home', this)"><span class="nav-icon">🏠</span><span>Home</span></button>
+        <button class="nav-item" onclick="switchTab('settings', this)"><span class="nav-icon">⚙️</span><span>Settings</span></button>
     </nav>
 
     <script>
         let logs = JSON.parse(localStorage.getItem('calData')) || [];
+        let waterLogs = JSON.parse(localStorage.getItem('waterData')) || [];
         let dailyGoal = parseInt(localStorage.getItem('calGoal')) || 2000;
+        let waterGoal = parseInt(localStorage.getItem('waterGoal')) || 2000;
         let viewDate = new Date();
         let editingId = null;
 
-        // Theme Init
         if(localStorage.getItem('theme') === 'dark') {
             document.documentElement.setAttribute('data-theme', 'dark');
             document.getElementById('themeBtn').innerText = "☀️";
@@ -180,7 +190,9 @@
         }
 
         function changeDate(n) { viewDate.setDate(viewDate.getDate() + n); updateUI(); }
+        
         function updateGoal(val) { if (val > 0) { dailyGoal = parseInt(val); localStorage.setItem('calGoal', dailyGoal); updateUI(false); } }
+        function updateWaterGoal(val) { if (val > 0) { waterGoal = parseInt(val); localStorage.setItem('waterGoal', waterGoal); updateUI(false); } }
 
         function addEntry() {
             const type = document.getElementById('mealType').value;
@@ -200,6 +212,17 @@
             document.getElementById('calories').value = '';
         }
 
+        function addWater(amt) {
+            const dStr = viewDate.toISOString().split('T')[0];
+            const existingIndex = waterLogs.findIndex(w => w.date === dStr);
+            if(existingIndex > -1) {
+                waterLogs[existingIndex].amount = Math.max(0, waterLogs[existingIndex].amount + amt);
+            } else {
+                waterLogs.push({ date: dStr, amount: Math.max(0, amt) });
+            }
+            saveWater();
+        }
+
         function editEntry(id) {
             const item = logs.find(l => l.id === id);
             editingId = id;
@@ -207,26 +230,31 @@
             document.getElementById('foodName').value = item.name;
             document.getElementById('calories').value = item.cals;
             document.getElementById('addBtn').innerText = "Update Entry";
-            window.scrollTo({ top: 150, behavior: 'smooth' });
+            switchTab('home', document.querySelector('.nav-item'));
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function deleteEntry(id) { logs = logs.filter(l => l.id !== id); save(); }
-        function clearData() { if(confirm("Permanently delete all logs?")) { logs = []; save(); } }
+        function clearData() { if(confirm("Clear all logs?")) { logs = []; waterLogs = []; save(); saveWater(); } }
+        
         function save() { localStorage.setItem('calData', JSON.stringify(logs)); updateUI(); }
+        function saveWater() { localStorage.setItem('waterData', JSON.stringify(waterLogs)); updateUI(); }
 
         function exportData() {
-            const blob = new Blob([JSON.stringify({logs, dailyGoal})], {type: "application/json"});
+            const blob = new Blob([JSON.stringify({logs, waterLogs, dailyGoal, waterGoal})], {type: "application/json"});
             const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url; a.download = `CalorieBackup.json`; a.click();
+            const a = document.createElement("a"); a.href = url; a.download = `HealthBackup.json`; a.click();
         }
 
         function importData(e) {
             const reader = new FileReader();
             reader.onload = (event) => {
                 const data = JSON.parse(event.target.result);
-                logs = data.logs; dailyGoal = data.dailyGoal;
-                save(); alert("Restored!");
+                logs = data.logs || []; 
+                waterLogs = data.waterLogs || [];
+                dailyGoal = data.dailyGoal || 2000;
+                waterGoal = data.waterGoal || 2000;
+                save(); saveWater(); alert("Restored!");
             };
             reader.readAsText(e.target.files[0]);
         }
@@ -235,21 +263,30 @@
             const dStr = viewDate.toISOString().split('T')[0];
             const dayLogs = logs.filter(l => l.date === dStr);
             const total = dayLogs.reduce((s, l) => s + l.cals, 0);
+            
+            const dayWater = waterLogs.find(w => w.date === dStr)?.amount || 0;
 
             document.getElementById('displayDate').innerText = dStr === new Date().toISOString().split('T')[0] ? "Today" : viewDate.toLocaleDateString(undefined, {month:'short', day:'numeric'});
             document.getElementById('calsConsumed').innerText = total;
+            document.getElementById('waterConsumed').innerText = dayWater;
+            document.getElementById('waterGoalLabel').innerText = waterGoal;
+            
             document.getElementById('goalInput').value = dailyGoal;
+            document.getElementById('waterGoalInput').value = waterGoal;
+
             document.getElementById('progressBar').style.width = Math.min((total/dailyGoal)*100, 100) + '%';
             document.getElementById('progressBar').style.background = total > dailyGoal ? 'var(--danger)' : 'var(--primary)';
+            
+            document.getElementById('waterBar').style.width = Math.min((dayWater/waterGoal)*100, 100) + '%';
 
             if(full) {
                 const list = document.getElementById('historyList'); list.innerHTML = '';
                 ["Breakfast", "Lunch", "Dinner", "Snack"].forEach(cat => {
                     const group = dayLogs.filter(l => l.type === cat);
                     if(group.length) {
-                        list.innerHTML += `<div class="meal-group-header">${cat}</div>`;
+                        list.innerHTML += `<div style="font-size: 11px; font-weight: 800; color: var(--accent); text-transform: uppercase; margin: 15px 0 8px 5px;">${cat}</div>`;
                         group.forEach(item => {
-                            list.innerHTML += `<div class="history-item"><span onclick="editEntry(${item.id})"><b>${item.name}</b></span><div>${item.cals} kcal <button class="delete-btn" onclick="deleteEntry(${item.id})">×</button></div></div>`;
+                            list.innerHTML += `<div style="display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 14px 18px; border-radius: 18px; margin-bottom: 8px; border: 1px solid var(--border);"><span onclick="editEntry(${item.id})" style="cursor:pointer;"><b>${item.name}</b></span><div>${item.cals} <span style="font-size:12px; color:#8E8E93">kcal</span> <button style="color: var(--danger); font-size: 20px; font-weight: bold; background: none; border: none; cursor: pointer; padding-left: 10px;" onclick="deleteEntry(${item.id})">×</button></div></div>`;
                         });
                     }
                 });
