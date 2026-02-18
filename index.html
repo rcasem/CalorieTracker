@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MyCalorieTracker</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <style>
+        :root { --bg: #f4f7f6; --card: #ffffff; --primary: #4CAF50; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica; background: var(--bg); margin: 0; padding: 20px; }
+        .card { background: var(--card); padding: 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        h2 { margin-top: 0; color: #333; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        button { width: 100%; background: var(--primary); color: white; border: none; padding: 15px; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; }
+        .entry { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .total { font-size: 1.5rem; font-weight: bold; color: var(--primary); text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <div class="total">Today: <span id="dailyTotal">0</span> kcal</div>
+    </div>
+
+    <div class="card">
+        <h3>Log Food</h3>
+        <input type="text" id="foodName" placeholder="e.g. Avocado Toast">
+        <input type="number" id="calories" placeholder="Calories (kcal)" inputmode="numeric">
+        <button onclick="addEntry()">Add Entry</button>
+    </div>
+
+    <div class="card">
+        <h3>Recent Logs</h3>
+        <div id="logList"></div>
+        <button onclick="clearLogs()" style="background: #ff4444; margin-top: 20px;">Clear Day</button>
+    </div>
+
+    <script>
+        let logs = JSON.parse(localStorage.getItem('calorieLogs')) || [];
+
+        function updateUI() {
+            const list = document.getElementById('logList');
+            const totalDisplay = document.getElementById('dailyTotal');
+            list.innerHTML = '';
+            let total = 0;
+
+            logs.forEach((entry, index) => {
+                total += parseInt(entry.cals);
+                list.innerHTML += `<div class="entry"><span>${entry.name}</span><strong>${entry.cals}</strong></div>`;
+            });
+
+            totalDisplay.innerText = total;
+            localStorage.setItem('calorieLogs', JSON.stringify(logs));
+        }
+
+        function addEntry() {
+            const name = document.getElementById('foodName').value;
+            const cals = document.getElementById('calories').value;
+            if (name && cals) {
+                logs.push({ name, cals });
+                document.getElementById('foodName').value = '';
+                document.getElementById('calories').value = '';
+                updateUI();
+            }
+        }
+
+        function clearLogs() {
+            if(confirm("Start a new day?")) {
+                logs = [];
+                updateUI();
+            }
+        }
+
+        updateUI();
+    </script>
+</body>
+</html>
