@@ -5,215 +5,161 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>CalorieTracker Pro</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root { 
             --bg: #F2F2F7; --card: #FFFFFF; --text: #000000; 
-            --primary: #34C759; --danger: #FF3B30; --border: #E5E5EA;
-            --accent: #007AFF;
+            --primary: #34C759; --danger: #FF3B30; --border: #E5E5EA; --accent: #007AFF;
         }
         [data-theme="dark"] { 
-            --bg: #000000; --card: #1C1C1E; --text: #FFFFFF; 
-            --border: #38383A; --primary: #30D158;
+            --bg: #000000; --card: #1C1C1E; --text: #FFFFFF; --border: #38383A;
         }
 
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; 
-            background: var(--bg); color: var(--text); 
-            margin: 0; padding: 20px; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        /* Container for iOS Notch */
-        .safe-area { padding-top: env(safe-area-inset-top); }
-
-        .card { 
-            background: var(--card); padding: 20px; border-radius: 24px; 
-            box-shadow: 0 8px 24px rgba(0,0,0,0.04); margin-bottom: 20px; 
-            border: 1px solid var(--border);
-        }
-
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; margin: 0; }
-
-        .progress-label { font-size: 14px; color: #8E8E93; font-weight: 600; margin-bottom: 8px; display: block; }
-        .progress-container { width: 100%; background: var(--border); border-radius: 12px; height: 12px; overflow: hidden; }
-        #progressBar { height: 100%; width: 0%; background: var(--primary); transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
-
-        .input-group { margin-bottom: 15px; }
-        label { font-size: 13px; font-weight: 600; margin-left: 5px; color: #8E8E93; text-transform: uppercase; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; transition: 0.3s; padding-bottom: 100px; }
+        .card { background: var(--card); padding: 20px; border-radius: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid var(--border); }
         
-        input { 
-            width: 100%; padding: 16px; margin-top: 5px; border: none; 
-            border-radius: 16px; font-size: 17px; box-sizing: border-box; 
-            background: var(--bg); color: var(--text); outline: none;
-            transition: ring 0.2s;
+        /* Form Styling */
+        select, input { 
+            width: 100%; padding: 14px; margin: 8px 0; border: none; border-radius: 12px; 
+            font-size: 16px; box-sizing: border-box; background: var(--bg); color: var(--text); 
         }
-        input:focus { box-shadow: 0 0 0 2px var(--accent); }
-
         button { 
-            width: 100%; background: var(--primary); color: white; border: none; 
-            padding: 18px; border-radius: 18px; font-weight: 700; font-size: 17px; 
-            margin-top: 10px; transition: transform 0.1s, opacity 0.2s;
-            -webkit-tap-highlight-color: transparent;
+            width: 100%; background: var(--primary); color: white; border: none; padding: 16px; 
+            border-radius: 16px; font-weight: 700; font-size: 16px; margin-top: 10px;
         }
-        button:active { transform: scale(0.97); opacity: 0.9; }
-        .btn-ghost { background: transparent; color: var(--accent); font-size: 14px; padding: 10px; }
-        .btn-export { background: var(--accent); }
 
+        /* History List Styling */
+        .meal-section { margin-top: 15px; }
+        .meal-header { font-size: 12px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
         .history-item { 
             display: flex; justify-content: space-between; align-items: center; 
-            padding: 14px 0; border-bottom: 0.5px solid var(--border); 
+            background: var(--bg); padding: 12px 15px; border-radius: 12px; margin-bottom: 8px;
         }
-        .history-item:last-child { border-bottom: none; }
-        
-        #chartContainer { height: 220px; margin-top: 10px; }
+        .item-info { display: flex; flex-direction: column; }
+        .item-name { font-weight: 600; font-size: 15px; }
+        .item-cals { font-size: 13px; color: #8E8E93; }
+        .delete-btn { color: var(--danger); font-size: 20px; font-weight: bold; background: none; width: auto; padding: 0 10px; margin: 0; }
+
+        .progress-container { width: 100%; background: var(--border); border-radius: 10px; height: 10px; overflow: hidden; margin-top: 10px; }
+        #progressBar { height: 100%; width: 0%; background: var(--primary); transition: 0.5s; }
     </style>
 </head>
 <body>
 
-    <div class="safe-area">
-        <div class="header">
-            <h1>Activity</h1>
-            <button onclick="toggleTheme()" class="btn-ghost" style="width:auto">Dark Mode</button>
-        </div>
+    <div class="header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h1 style="margin:0; font-size:24px;">Today</h1>
+        <button onclick="toggleTheme()" style="width:auto; padding: 8px 12px; font-size:12px; background:var(--border); color:var(--text);">Theme</button>
+    </div>
 
-        <div class="card">
-            <span class="progress-label">DAILY CALORIES</span>
-            <div style="display:flex; justify-content:space-between; align-items: flex-end; margin-bottom: 10px;">
-                <span id="calsConsumed" style="font-size: 32px; font-weight: 700;">0</span>
-                <span id="calsGoalText" style="color: #8E8E93; font-weight: 500; padding-bottom: 4px;">/ 2000 kcal</span>
-            </div>
-            <div class="progress-container"><div id="progressBar"></div></div>
-            <p id="remainingText" style="font-size: 14px; margin-top: 12px; color: #8E8E93;"></p>
+    <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:baseline;">
+            <span id="calsConsumed" style="font-size: 32px; font-weight: 800;">0</span>
+            <span id="goalText" style="color: #8E8E93;">/ 2000 kcal</span>
         </div>
+        <div class="progress-container"><div id="progressBar"></div></div>
+    </div>
 
-        <div class="card">
-            <span class="progress-label">WEEKLY TREND</span>
-            <div id="chartContainer"><canvas id="myChart"></canvas></div>
-        </div>
+    <div class="card">
+        <select id="mealType">
+            <option value="Breakfast">🍳 Breakfast</option>
+            <option value="Lunch">🥗 Lunch</option>
+            <option value="Dinner">🥩 Dinner</option>
+            <option value="Snack">🍎 Snack</option>
+        </select>
+        <input type="text" id="foodName" placeholder="Food Name">
+        <input type="number" id="calories" placeholder="Calories" inputmode="numeric">
+        <button onclick="addEntry()">Log Meal</button>
+    </div>
 
-        <div class="card">
-            <div class="input-group">
-                <label>Food Entry</label>
-                <input type="text" id="foodName" placeholder="What did you eat?">
-            </div>
-            <div class="input-group">
-                <label>Calories</label>
-                <input type="number" id="calories" placeholder="0" inputmode="numeric">
-            </div>
-            <button onclick="addEntry()">Add Meal</button>
-        </div>
-
-        <div class="card">
-            <span class="progress-label">SETTINGS & DATA</span>
-            <div class="input-group" style="margin-top:10px;">
-                <label>Set Daily Goal</label>
-                <input type="number" id="goalInput" onchange="updateGoal(this.value)">
-            </div>
-            <button class="btn-export" onclick="exportToCSV()">Export Data (.csv)</button>
-            <button class="btn-ghost" style="color:var(--danger); margin-top:20px;" onclick="clearLocalStorage()">Reset All History</button>
-        </div>
+    <div class="card">
+        <h3 style="margin-top:0">Recent Logs</h3>
+        <div id="historyList"></div>
     </div>
 
     <script>
-        // ... (Include the JavaScript from the previous response here) ...
-        // Note: The JS logic remains the same, but the UI IDs match the new styled elements.
-        
         let logs = JSON.parse(localStorage.getItem('calData')) || [];
         let dailyGoal = localStorage.getItem('calGoal') || 2000;
-        let myChart;
 
+        // Apply Dark Mode on load
         if(localStorage.getItem('theme') === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
-        
+
         function toggleTheme() {
-            let current = document.documentElement.getAttribute('data-theme');
-            let target = current === 'dark' ? 'light' : 'dark';
+            let target = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
             document.documentElement.setAttribute('data-theme', target);
             localStorage.setItem('theme', target);
-            renderChart();
-        }
-
-        function updateGoal(val) {
-            dailyGoal = val;
-            localStorage.setItem('calGoal', val);
-            updateUI();
         }
 
         function addEntry() {
+            const type = document.getElementById('mealType').value;
             const name = document.getElementById('foodName').value || "Meal";
             const cals = parseInt(document.getElementById('calories').value);
+            
             if (!cals) return;
-            logs.push({ name, cals, date: new Date().toISOString().split('T')[0] });
-            localStorage.setItem('calData', JSON.stringify(logs));
+
+            const entry = {
+                id: Date.now(), // Unique ID for deleting
+                type,
+                name,
+                cals,
+                date: new Date().toISOString().split('T')[0]
+            };
+
+            logs.push(entry);
+            saveAndRefresh();
+            
             document.getElementById('foodName').value = '';
             document.getElementById('calories').value = '';
+        }
+
+        function deleteEntry(id) {
+            logs = logs.filter(item => item.id !== id);
+            saveAndRefresh();
+        }
+
+        function saveAndRefresh() {
+            localStorage.setItem('calData', JSON.stringify(logs));
             updateUI();
         }
 
         function updateUI() {
             const today = new Date().toISOString().split('T')[0];
-            const todayTotal = logs.filter(l => l.date === today).reduce((s, l) => s + l.cals, 0);
-            const percent = Math.min((todayTotal / dailyGoal) * 100, 100);
-            
+            const todayLogs = logs.filter(l => l.date === today);
+            const total = todayLogs.reduce((s, l) => s + l.cals, 0);
+
+            // Update Stats
+            document.getElementById('calsConsumed').innerText = total;
+            document.getElementById('goalText').innerText = `/ ${dailyGoal} kcal`;
+            const percent = Math.min((total / dailyGoal) * 100, 100);
             document.getElementById('progressBar').style.width = percent + '%';
-            document.getElementById('progressBar').style.background = todayTotal > dailyGoal ? 'var(--danger)' : 'var(--primary)';
-            document.getElementById('calsConsumed').innerText = todayTotal;
-            document.getElementById('calsGoalText').innerText = `/ ${dailyGoal} kcal`;
-            document.getElementById('remainingText').innerText = todayTotal > dailyGoal 
-                ? `You are ${todayTotal - dailyGoal} kcal over your goal.` 
-                : `You can eat ${dailyGoal - todayTotal} more kcal today.`;
-            
-            document.getElementById('goalInput').value = dailyGoal;
-            renderChart();
-        }
+            document.getElementById('progressBar').style.background = total > dailyGoal ? 'var(--danger)' : 'var(--primary)';
 
-        function renderChart() {
-            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-            const ctx = document.getElementById('myChart').getContext('2d');
-            const last7Days = [...Array(7)].map((_, i) => {
-                const d = new Date(); d.setDate(d.getDate() - i);
-                return d.toISOString().split('T')[0];
-            }).reverse();
-            const totals = last7Days.map(d => logs.filter(l => l.date === d).reduce((s, l) => s + l.cals, 0));
+            // Update List
+            const list = document.getElementById('historyList');
+            list.innerHTML = '';
 
-            if (myChart) myChart.destroy();
-            myChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: last7Days.map(d => {
-                        const date = new Date(d);
-                        return date.toLocaleDateString('en-US', { weekday: 'short' });
-                    }),
-                    datasets: [{
-                        data: totals,
-                        backgroundColor: totals.map(v => v > dailyGoal ? '#FF3B30' : '#34C759'),
-                        borderRadius: 8,
-                        barThickness: 25
-                    }]
-                },
-                options: { 
-                    maintainAspectRatio: false,
-                    scales: { 
-                        x: { grid: { display: false }, ticks: { color: isDark ? '#8E8E93' : '#8E8E93', font: { weight: '600' } } },
-                        y: { display: false }
-                    },
-                    plugins: { legend: { display: false } }
+            const categories = ["Breakfast", "Lunch", "Dinner", "Snack"];
+            categories.forEach(cat => {
+                const catLogs = todayLogs.filter(l => l.type === cat);
+                if (catLogs.length > 0) {
+                    let section = `<div class="meal-section"><div class="meal-header">${cat}</div>`;
+                    catLogs.forEach(item => {
+                        section += `
+                            <div class="history-item">
+                                <div class="item-info">
+                                    <span class="item-name">${item.name}</span>
+                                    <span class="item-cals">${item.cals} kcal</span>
+                                </div>
+                                <button class="delete-btn" onclick="deleteEntry(${item.id})">×</button>
+                            </div>`;
+                    });
+                    section += `</div>`;
+                    list.innerHTML += section;
                 }
             });
+            
+            if (todayLogs.length === 0) list.innerHTML = '<p style="color:#8E8E93; text-align:center;">No meals logged today.</p>';
         }
 
-        function exportToCSV() {
-            let csv = "Date,Food,Calories\n" + logs.map(r => `${r.date},${r.name},${r.cals}`).join("\n");
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.setAttribute('href', url);
-            a.setAttribute('download', 'nutrition_data.csv');
-            a.click();
-        }
-
-        function clearLocalStorage() { if(confirm("Clear all data?")) { localStorage.clear(); location.reload(); } }
         updateUI();
     </script>
 </body>
