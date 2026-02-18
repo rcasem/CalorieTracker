@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>CalorieTracker Pro</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root { 
             --bg: #F2F2F7; --card: #FFFFFF; --text: #000000; 
@@ -16,70 +15,78 @@
         }
 
         body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; transition: 0.3s; padding-bottom: 100px; }
-        .card { background: var(--card); padding: 20px; border-radius: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid var(--border); }
+        .card { background: var(--card); padding: 20px; border-radius: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 12px; border: 1px solid var(--border); }
         
+        /* Inline Goal Input */
+        .goal-input-minimal {
+            background: transparent; border: none; color: #8E8E93; font-size: 16px; 
+            font-weight: 600; width: 60px; text-align: right; padding: 0; margin: 0; outline: none;
+        }
+
         select, input { 
-            width: 100%; padding: 14px; margin: 8px 0; border: none; border-radius: 12px; 
+            width: 100%; padding: 12px; margin: 6px 0; border: none; border-radius: 12px; 
             font-size: 16px; box-sizing: border-box; background: var(--bg); color: var(--text); 
         }
         button { 
             width: 100%; background: var(--primary); color: white; border: none; padding: 16px; 
-            border-radius: 16px; font-weight: 700; font-size: 16px; margin-top: 10px;
+            border-radius: 16px; font-weight: 700; font-size: 16px; margin-top: 8px;
         }
 
         .meal-section { margin-top: 15px; }
-        .meal-header { font-size: 12px; font-weight: 700; color: var(--accent); text-transform: uppercase; margin-bottom: 5px; }
+        .meal-header { font-size: 11px; font-weight: 700; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; opacity: 0.8; }
         .history-item { 
             display: flex; justify-content: space-between; align-items: center; 
             background: var(--bg); padding: 12px 15px; border-radius: 12px; margin-bottom: 8px;
         }
-        .item-info { flex-grow: 1; cursor: pointer; }
-        .item-name { font-weight: 600; font-size: 15px; display: block; }
+        .item-info { flex-grow: 1; }
+        .item-name { font-weight: 600; font-size: 15px; }
         .item-cals { font-size: 13px; color: #8E8E93; }
-        .delete-btn { color: var(--danger); font-size: 20px; font-weight: bold; background: none; width: auto; padding: 0 10px; margin: 0; }
+        .delete-btn { color: var(--danger); font-size: 20px; font-weight: bold; background: none; width: auto; padding: 0 5px; margin: 0; }
 
-        .progress-container { width: 100%; background: var(--border); border-radius: 10px; height: 10px; overflow: hidden; margin-top: 10px; }
-        #progressBar { height: 100%; width: 0%; background: var(--primary); transition: 0.5s; }
-        
-        .label-small { font-size: 12px; font-weight: 600; color: #8E8E93; margin-left: 5px; }
+        .progress-container { width: 100%; background: var(--border); border-radius: 10px; height: 8px; overflow: hidden; margin-top: 15px; }
+        #progressBar { height: 100%; width: 0%; background: var(--primary); transition: 0.5s cubic-bezier(0.1, 0.7, 0.1, 1); }
     </style>
 </head>
 <body>
 
-    <div class="header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-        <h1 style="margin:0; font-size:24px;">Today</h1>
-        <button onclick="toggleTheme()" style="width:auto; padding: 8px 12px; font-size:12px; background:var(--border); color:var(--text); border-radius: 10px;">Theme</button>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding: 0 5px;">
+        <h1 style="margin:0; font-size:26px; font-weight: 800;">Summary</h1>
+        <button onclick="toggleTheme()" style="width:auto; padding: 6px 12px; font-size:11px; background:var(--border); color:var(--text); border-radius: 20px; margin:0;">THEME</button>
     </div>
 
-    <div class="card">
-        <div style="display:flex; justify-content:space-between; align-items:baseline;">
-            <span id="calsConsumed" style="font-size: 32px; font-weight: 800;">0</span>
-            <span style="color: #8E8E93;">/ <span id="goalLabel">2000</span> kcal</span>
+    <div class="card" style="padding-bottom: 25px;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+            <div>
+                <span style="font-size: 12px; font-weight: 700; color: #8E8E93; display: block; margin-bottom: 4px;">CALORIES CONSUMED</span>
+                <span id="calsConsumed" style="font-size: 40px; font-weight: 800; line-height: 1;">0</span>
+            </div>
+            <div style="text-align: right;">
+                <span style="font-size: 12px; font-weight: 700; color: #8E8E93; display: block; margin-bottom: 4px;">TARGET</span>
+                <div style="display:flex; align-items: baseline; justify-content: flex-end;">
+                    <input type="number" id="goalInput" class="goal-input-minimal" oninput="updateGoal(this.value)">
+                    <span style="color: #8E8E93; font-size: 14px; font-weight: 600; margin-left: 2px;">kcal</span>
+                </div>
+            </div>
         </div>
         <div class="progress-container"><div id="progressBar"></div></div>
     </div>
 
     <div class="card">
-        <span class="label-small">DAILY TARGET</span>
-        <input type="number" id="goalInput" placeholder="Set Goal" oninput="updateGoal(this.value)">
+        <div style="display:flex; gap: 8px;">
+            <select id="mealType" style="flex: 1;">
+                <option value="Breakfast">Breakfast</option>
+                <option value="Lunch">Lunch</option>
+                <option value="Dinner">Dinner</option>
+                <option value="Snack">Snack</option>
+            </select>
+            <input type="number" id="calories" placeholder="kcal" inputmode="numeric" style="flex: 0.5;">
+        </div>
+        <input type="text" id="foodName" placeholder="What did you have?">
+        <button id="addBtn" onclick="addEntry()">Log Entry</button>
     </div>
 
     <div class="card">
-        <span class="label-small" id="formTitle">LOG MEAL</span>
-        <select id="mealType">
-            <option value="Breakfast">Breakfast</option>
-            <option value="Lunch">Lunch</option>
-            <option value="Dinner">Dinner</option>
-            <option value="Snack">Snack</option>
-        </select>
-        <input type="text" id="foodName" placeholder="Food Name">
-        <input type="number" id="calories" placeholder="Calories" inputmode="numeric">
-        <button id="addBtn" onclick="addEntry()">Log Meal</button>
-    </div>
-
-    <div class="card">
-        <h3 style="margin-top:0">Recent Logs</h3>
-        <p style="font-size: 11px; color: #8E8E93; margin-bottom: 15px;">Tip: Tap a meal name to edit</p>
+        <h3 style="margin:0 0 15px 0; font-size: 17px;">History</h3>
         <div id="historyList"></div>
     </div>
 
@@ -100,7 +107,7 @@
             if (val > 0) {
                 dailyGoal = parseInt(val);
                 localStorage.setItem('calGoal', dailyGoal);
-                updateUI();
+                updateUI(false); // Don't refresh the list while typing
             }
         }
 
@@ -108,18 +115,14 @@
             const type = document.getElementById('mealType').value;
             const name = document.getElementById('foodName').value || "Meal";
             const cals = parseInt(document.getElementById('calories').value);
-            
             if (!cals) return;
 
             if (editingId) {
-                // Update existing
                 const index = logs.findIndex(l => l.id === editingId);
                 logs[index] = { ...logs[index], type, name, cals };
                 editingId = null;
-                document.getElementById('addBtn').innerText = "Log Meal";
-                document.getElementById('formTitle').innerText = "LOG MEAL";
+                document.getElementById('addBtn').innerText = "Log Entry";
             } else {
-                // Create new
                 logs.push({ id: Date.now(), type, name, cals, date: new Date().toISOString().split('T')[0] });
             }
 
@@ -131,13 +134,11 @@
         function editEntry(id) {
             const item = logs.find(l => l.id === id);
             if (!item) return;
-
             editingId = id;
             document.getElementById('mealType').value = item.type;
             document.getElementById('foodName').value = item.name;
             document.getElementById('calories').value = item.cals;
-            document.getElementById('addBtn').innerText = "Update Meal";
-            document.getElementById('formTitle').innerText = "EDITING MEAL";
+            document.getElementById('addBtn').innerText = "Update Entry";
             window.scrollTo({ top: 150, behavior: 'smooth' });
         }
 
@@ -148,21 +149,22 @@
 
         function saveAndRefresh() {
             localStorage.setItem('calData', JSON.stringify(logs));
-            updateUI();
+            updateUI(true);
         }
 
-        function updateUI() {
+        function updateUI(refreshList = true) {
             const today = new Date().toISOString().split('T')[0];
             const todayLogs = logs.filter(l => l.date === today);
             const total = todayLogs.reduce((s, l) => s + l.cals, 0);
 
             document.getElementById('calsConsumed').innerText = total;
-            document.getElementById('goalLabel').innerText = dailyGoal;
             document.getElementById('goalInput').value = dailyGoal;
             
             const percent = Math.min((total / dailyGoal) * 100, 100);
             document.getElementById('progressBar').style.width = percent + '%';
             document.getElementById('progressBar').style.background = total > dailyGoal ? 'var(--danger)' : 'var(--primary)';
+
+            if (!refreshList) return;
 
             const list = document.getElementById('historyList');
             list.innerHTML = '';
@@ -175,8 +177,8 @@
                         section += `
                             <div class="history-item">
                                 <div class="item-info" onclick="editEntry(${item.id})">
-                                    <span class="item-name">${item.name}</span>
-                                    <span class="item-cals">${item.cals} kcal</span>
+                                    <div class="item-name">${item.name}</div>
+                                    <div class="item-cals">${item.cals} kcal</div>
                                 </div>
                                 <button class="delete-btn" onclick="deleteEntry(${item.id})">×</button>
                             </div>`;
@@ -185,7 +187,7 @@
                 }
             });
             
-            if (todayLogs.length === 0) list.innerHTML = '<p style="color:#8E8E93; text-align:center;">No meals today.</p>';
+            if (todayLogs.length === 0) list.innerHTML = '<p style="color:#8E8E93; text-align:center; font-size:14px;">Log a meal to get started.</p>';
         }
 
         updateUI();
