@@ -3,70 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MyCalorieTracker</title>
+    <title>CalorieTracker Pro</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { --bg: #f4f7f6; --card: #ffffff; --primary: #4CAF50; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica; background: var(--bg); margin: 0; padding: 20px; }
-        .card { background: var(--card); padding: 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        h2 { margin-top: 0; color: #333; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        button { width: 100%; background: var(--primary); color: white; border: none; padding: 15px; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; }
-        .entry { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
-        .total { font-size: 1.5rem; font-weight: bold; color: var(--primary); text-align: center; }
+        :root { --bg: #f0f2f5; --card: #ffffff; --primary: #34d399; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 15px; padding-bottom: 50px; }
+        .card { background: var(--card); padding: 20px; border-radius: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 15px; }
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #e5e7eb; border-radius: 10px; font-size: 16px; box-sizing: border-box; }
+        button { width: 100%; background: var(--primary); color: white; border: none; padding: 14px; border-radius: 10px; font-weight: bold; font-size: 16px; margin-top: 5px; }
+        .entry { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f3f4f6; font-size: 14px; }
+        #chartContainer { height: 200px; width: 100%; }
+        h3 { margin-top: 0; font-size: 18px; color: #1f2937; }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <div class="total">Today: <span id="dailyTotal">0</span> kcal</div>
+        <h3>7-Day Trend</h3>
+        <div id="chartContainer">
+            <canvas id="myChart"></canvas>
+        </div>
     </div>
 
     <div class="card">
-        <h3>Log Food</h3>
-        <input type="text" id="foodName" placeholder="e.g. Avocado Toast">
-        <input type="number" id="calories" placeholder="Calories (kcal)" inputmode="numeric">
-        <button onclick="addEntry()">Add Entry</button>
+        <h3>Log Meal</h3>
+        <input type="text" id="foodName" placeholder="What did you eat?">
+        <input type="number" id="calories" placeholder="Calories" inputmode="numeric">
+        <button onclick="addEntry()">Add to Today</button>
     </div>
 
     <div class="card">
-        <h3>Recent Logs</h3>
+        <h3>Today's History</h3>
         <div id="logList"></div>
-        <button onclick="clearLogs()" style="background: #ff4444; margin-top: 20px;">Clear Day</button>
+        <button onclick="clearLocalStorage()" style="background: #ef4444; margin-top: 20px; font-size: 12px; padding: 8px;">Reset All Data</button>
     </div>
 
     <script>
-        let logs = JSON.parse(localStorage.getItem('calorieLogs')) || [];
-
-        function updateUI() {
-            const list = document.getElementById('logList');
-            const totalDisplay = document.getElementById('dailyTotal');
-            list.innerHTML = '';
-            let total = 0;
-
-            logs.forEach((entry, index) => {
-                total += parseInt(entry.cals);
-                list.innerHTML += `<div class="entry"><span>${entry.name}</span><strong>${entry.cals}</strong></div>`;
-            });
-
-            totalDisplay.innerText = total;
-            localStorage.setItem('calorieLogs', JSON.stringify(logs));
-        }
+        let logs = JSON.parse(localStorage.getItem('calData')) || [];
+        let myChart;
 
         function addEntry() {
             const name = document.getElementById('foodName').value;
-            const cals = document.getElementById('calories').value;
+            const cals = parseInt(document.getElementById('calories').value);
+            const date = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+
             if (name && cals) {
-                logs.push({ name, cals });
+                logs.push({ name, cals, date });
+                localStorage.setItem('calData', JSON.stringify(logs));
                 document.getElementById('foodName').value = '';
                 document.getElementById('calories').value = '';
                 updateUI();
             }
         }
 
-        function clearLogs() {
-            if(confirm("Start a new day?")) {
+        function updateUI() {
+            const list = document.getElementById('logList');
+            const today = new Date().toISOString().split('T')[0];
+            list.innerHTML = '';
+            
+            // Filter logs for just today to show in the list
+            logs.filter(entry => entry.date === today).forEach(entry => {
+                list.innerHTML += `<div class="entry"><span>${entry.name}</span><strong>${entry.cals} kcal</strong></div>`;
+            });
+
+            renderChart();
+        }
+
+        function renderChart() {
+            const ctx = document.getElementById('myChart').getContext('2d');
+            const last7Days = [...Array(7)].map((_, i) => {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                return d.toISOString().split('T')[0];
+            }).reverse();
+
+            const totalsByDay = last7Days.map(date => {
+                return logs.filter(log => log.date === date)
+                           .reduce((sum, log) => sum + log.cals, 0);
+            });
+
+            if (myChart) myChart.destroy();
+            myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: last7Days.map(d => d.slice(5)), // MM-DD format
+                    datasets: [{
+                        label: 'Calories',
+                        data: totalsByDay,
+                        backgroundColor: '#34d399',
+                        borderRadius: 5
+                    }]
+                },
+                options: { maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+            });
+        }
+
+        function clearLocalStorage() {
+            if(confirm("Delete everything?")) {
+                localStorage.clear();
                 logs = [];
                 updateUI();
             }
