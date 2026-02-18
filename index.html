@@ -5,203 +5,243 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>CalorieTracker Pro</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
-    
     <style>
         :root { 
             --bg: #F2F2F7; --card: #FFFFFF; --text: #000000; 
             --primary: #34C759; --danger: #FF3B30; --border: #E5E5EA; --accent: #007AFF;
-            --pill: rgba(142, 142, 147, 0.15);
+            --pill: rgba(0, 0, 0, 0.05);
         }
         [data-theme="dark"] { 
-            --bg: #000000; --card: #1C1C1E; --text: #FFFFFF; --border: #38383A;
-            --pill: rgba(255, 255, 255, 0.15);
+            --bg: #000000; --card: #1C1C1E; --text: #FFFFFF; --border: #2C2C2E;
+            --pill: rgba(255, 255, 255, 0.1);
         }
 
-        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; transition: 0.3s; padding-bottom: 100px; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .card { background: var(--card); padding: 20px; border-radius: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 12px; border: 1px solid var(--border); }
-
-        /* FIXED: Extra wide target container */
-        .goal-container { 
-            display: flex; align-items: center; background: var(--pill); 
-            padding: 10px 16px; border-radius: 16px; border: 1.5px solid transparent; 
-            margin-top: 4px; min-width: 120px; justify-content: center;
+        body { 
+            font-family: -apple-system, system-ui, sans-serif; 
+            background: var(--bg); color: var(--text); 
+            margin: 0; padding: 0; transition: background 0.3s;
         }
-        .goal-container:focus-within { border-color: var(--accent); background: rgba(0, 122, 255, 0.1); }
-        .goal-input-minimal { background: transparent; border: none; color: var(--text); font-size: 18px; font-weight: 700; width: 80px; text-align: center; outline: none; padding: 0; }
 
-        .form-row { display: flex; gap: 8px; margin-bottom: 8px; }
-        select, input { width: 100%; padding: 14px; border: none; border-radius: 14px; font-size: 16px; box-sizing: border-box; background: var(--bg); color: var(--text); }
-        button { width: 100%; background: var(--primary); color: white; border: none; padding: 16px; border-radius: 16px; font-weight: 700; font-size: 16px; margin-top: 8px; cursor: pointer; }
-
-        .progress-container { width: 100%; background: var(--border); border-radius: 10px; height: 10px; overflow: hidden; margin-top: 25px; }
-        #progressBar { height: 100%; width: 0%; background: var(--primary); transition: 0.6s ease-out; }
-
-        /* Categorized History Styling */
-        .meal-group { margin-bottom: 20px; }
-        .meal-group-header { 
-            font-size: 11px; font-weight: 800; color: var(--accent); 
-            text-transform: uppercase; letter-spacing: 0.5px; 
-            margin-bottom: 8px; padding-left: 4px;
+        /* Top Sticky Header */
+        .sticky-header {
+            position: sticky; top: 0; z-index: 10;
+            background: var(--bg); padding: 15px 20px;
+            display: flex; justify-content: space-between; align-items: center;
         }
-        .history-item { 
-            display: flex; justify-content: space-between; align-items: center; 
-            background: var(--bg); padding: 12px 15px; border-radius: 14px; margin-bottom: 6px;
-            font-size: 15px; gap: 10px;
+
+        .date-stepper {
+            display: flex; align-items: center; background: var(--pill);
+            padding: 5px; border-radius: 12px; gap: 5px;
         }
-        .item-name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; cursor: pointer; }
-        .item-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
-        .item-cals { font-weight: 700; color: var(--text); min-width: 40px; text-align: right; }
-        .delete-btn { color: var(--danger); font-size: 20px; font-weight: bold; background: none; border: none; padding: 0 4px; cursor: pointer; }
+        .step-btn {
+            background: var(--card); border: none; color: var(--text);
+            width: 32px; height: 32px; border-radius: 8px; font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .container { padding: 0 16px 100px 16px; }
+
+        .card { 
+            background: var(--card); padding: 20px; border-radius: 28px; 
+            margin-bottom: 16px; border: 1px solid var(--border);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.02);
+        }
+
+        /* Target Input Logic */
+        .target-box {
+            background: var(--pill); padding: 10px 15px; border-radius: 16px;
+            display: flex; align-items: center; border: 1px solid transparent;
+            min-width: 130px; transition: 0.2s;
+        }
+        .target-box:focus-within { border-color: var(--accent); background: var(--card); }
+        .target-input {
+            background: transparent; border: none; color: var(--text);
+            font-size: 20px; font-weight: 800; width: 85px; text-align: center; outline: none;
+        }
+
+        /* Progress Visuals */
+        .progress-ring-container { margin-top: 20px; }
+        .bar-bg { background: var(--border); height: 12px; border-radius: 6px; overflow: hidden; }
+        #barFill { height: 100%; background: var(--primary); width: 0%; transition: 0.8s cubic-bezier(0.1, 0.8, 0.2, 1); }
+
+        /* Form Controls */
+        .input-group { display: flex; gap: 10px; margin-bottom: 10px; }
+        input, select { 
+            background: var(--pill); border: none; padding: 16px; 
+            border-radius: 16px; color: var(--text); font-size: 16px; width: 100%;
+            outline: none; -webkit-appearance: none;
+        }
+        .btn-main { 
+            background: var(--primary); color: white; border: none; 
+            padding: 18px; border-radius: 18px; font-weight: 700; font-size: 16px;
+            width: 100%; margin-top: 5px;
+        }
+
+        /* History Refinement */
+        .meal-header { 
+            font-size: 12px; font-weight: 700; color: #8E8E93; 
+            text-transform: uppercase; margin: 20px 0 8px 8px;
+        }
+        .history-row {
+            display: flex; justify-content: space-between; align-items: center;
+            background: var(--card); padding: 14px 18px; border-radius: 18px;
+            margin-bottom: 8px; border: 1px solid var(--border);
+        }
+        .history-row:active { transform: scale(0.98); background: var(--pill); }
+        .row-name { font-weight: 600; font-size: 16px; }
+        .row-right { display: flex; align-items: center; gap: 15px; }
+        .row-cals { font-weight: 800; color: var(--text); }
+        .del-x { color: var(--danger); font-size: 18px; font-weight: bold; background: none; border: none; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1 style="margin:0; font-size:26px; font-weight: 800;">Summary</h1>
-        <button onclick="toggleTheme()" style="width:auto; padding: 6px 14px; font-size:11px; background:var(--border); color:var(--text); border-radius: 20px; border:none; font-weight:700;">THEME</button>
+    <div class="sticky-header">
+        <div class="date-stepper">
+            <button class="step-btn" onclick="changeDate(-1)">⇠</button>
+            <span id="displayDate" style="font-weight: 800; padding: 0 10px;">Today</span>
+            <button class="step-btn" onclick="changeDate(1)">⇢</button>
+        </div>
+        <button onclick="toggleTheme()" style="background:none; border:none; color:var(--accent); font-weight:700;">Theme</button>
     </div>
 
-    <div class="card">
-        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-            <div>
-                <span style="font-size: 11px; font-weight: 700; color: #8E8E93; letter-spacing: 0.5px;">CONSUMED</span>
-                <div style="display: flex; align-items: baseline;">
-                    <span id="calsConsumed" style="font-size: 42px; font-weight: 800; line-height: 1;">0</span>
-                    <span style="font-size: 16px; font-weight: 600; color: #8E8E93; margin-left: 4px;">kcal</span>
+    <div class="container">
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <div style="font-size: 12px; font-weight: 700; color: #8E8E93;">CONSUMED</div>
+                    <div style="font-size: 48px; font-weight: 900;"><span id="totalCals">0</span><span style="font-size:16px; color:#8E8E93; margin-left:4px;">kcal</span></div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 12px; font-weight: 700; color: #8E8E93; margin-bottom: 5px;">TARGET</div>
+                    <div class="target-box">
+                        <input type="number" id="goalInput" class="target-input" oninput="updateGoal(this.value)">
+                        <span style="font-weight: 700; font-size: 12px;">KCAL</span>
+                    </div>
                 </div>
             </div>
-            <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end;">
-                <span style="font-size: 11px; font-weight: 700; color: #8E8E93; letter-spacing: 0.5px;">TARGET</span>
-                <div class="goal-container" onclick="document.getElementById('goalInput').focus()">
-                    <input type="number" id="goalInput" class="goal-input-minimal" oninput="updateGoal(this.value)">
-                    <span style="font-size: 13px; font-weight: 700; margin-left: 4px;">kcal</span>
-                </div>
+            <div class="progress-ring-container">
+                <div class="bar-bg"><div id="barFill"></div></div>
             </div>
         </div>
-        <div class="progress-container"><div id="progressBar"></div></div>
-    </div>
 
-    <div class="card">
-        <div class="form-row">
-            <select id="mealType" style="flex: 1.2;">
-                <option value="Breakfast">Breakfast</option>
-                <option value="Lunch">Lunch</option>
-                <option value="Dinner">Dinner</option>
-                <option value="Snack">Snack</option>
-            </select>
-            <input type="number" id="calories" placeholder="kcal" inputmode="numeric" style="flex: 1;">
+        <div class="card">
+            <div class="input-group">
+                <select id="mealType" style="flex: 1.3;">
+                    <option value="Breakfast">Breakfast</option>
+                    <option value="Lunch">Lunch</option>
+                    <option value="Dinner">Dinner</option>
+                    <option value="Snack">Snack</option>
+                </select>
+                <input type="number" id="calories" placeholder="kcal" inputmode="numeric" style="flex: 1;">
+            </div>
+            <input type="text" id="foodName" placeholder="Food name...">
+            <button id="addBtn" class="btn-main" onclick="addEntry()">Log Entry</button>
         </div>
-        <input type="text" id="foodName" placeholder="What did you eat?">
-        <button id="addBtn" onclick="addEntry()">Log Entry</button>
-    </div>
 
-    <div class="card">
-        <h3 style="margin:0 0 15px 0; font-size: 17px; font-weight: 700;">History</h3>
-        <div id="historyList"></div>
+        <div id="historyContainer"></div>
     </div>
 
     <script>
         let logs = JSON.parse(localStorage.getItem('calData')) || [];
         let dailyGoal = parseInt(localStorage.getItem('calGoal')) || 2000;
-        let editingId = null;
+        let viewDate = new Date();
+        let editId = null;
 
         if(localStorage.getItem('theme') === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
 
         function toggleTheme() {
-            let target = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', target);
-            localStorage.setItem('theme', target);
+            let t = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', t);
+            localStorage.setItem('theme', t);
         }
 
-        function updateGoal(val) {
-            if (val > 0) {
-                dailyGoal = parseInt(val);
-                localStorage.setItem('calGoal', dailyGoal);
-                updateUI(false); 
-            }
-        }
+        function changeDate(n) { viewDate.setDate(viewDate.getDate() + n); updateUI(); }
+
+        function updateGoal(v) { if(v > 0) { dailyGoal = parseInt(v); localStorage.setItem('calGoal', dailyGoal); updateUI(false); } }
 
         function addEntry() {
             const type = document.getElementById('mealType').value;
             const name = document.getElementById('foodName').value || "Meal";
             const cals = parseInt(document.getElementById('calories').value);
-            if (!cals) return;
+            const dStr = viewDate.toISOString().split('T')[0];
 
-            if (editingId) {
-                const index = logs.findIndex(l => l.id === editingId);
-                logs[index] = { ...logs[index], type, name, cals };
-                editingId = null;
+            if(!cals) return;
+
+            if(editId) {
+                const i = logs.findIndex(l => l.id === editId);
+                logs[i] = { ...logs[i], type, name, cals };
+                editId = null;
                 document.getElementById('addBtn').innerText = "Log Entry";
-                document.getElementById('addBtn').style.backgroundColor = "var(--primary)";
+                document.getElementById('addBtn').style.background = "var(--primary)";
             } else {
-                logs.push({ id: Date.now(), type, name, cals, date: new Date().toISOString().split('T')[0] });
+                logs.push({ id: Date.now(), type, name, cals, date: dStr });
             }
 
-            saveAndRefresh();
+            localStorage.setItem('calData', JSON.stringify(logs));
+            updateUI();
             document.getElementById('foodName').value = '';
             document.getElementById('calories').value = '';
         }
 
         function editEntry(id) {
-            const item = logs.find(l => l.id === id);
-            if (!item) return;
-            editingId = id;
-            document.getElementById('mealType').value = item.type;
-            document.getElementById('foodName').value = item.name;
-            document.getElementById('calories').value = item.cals;
-            document.getElementById('addBtn').innerText = "Update Entry";
-            document.getElementById('addBtn').style.backgroundColor = "var(--accent)";
-            window.scrollTo({ top: 150, behavior: 'smooth' });
+            const l = logs.find(x => x.id === id);
+            editId = id;
+            document.getElementById('mealType').value = l.type;
+            document.getElementById('foodName').value = l.name;
+            document.getElementById('calories').value = l.cals;
+            document.getElementById('addBtn').innerText = "Update";
+            document.getElementById('addBtn').style.background = "var(--accent)";
+            window.scrollTo({top: 100, behavior: 'smooth'});
         }
 
         function deleteEntry(id) {
-            logs = logs.filter(item => item.id !== id);
-            saveAndRefresh();
-        }
-
-        function saveAndRefresh() {
+            logs = logs.filter(x => x.id !== id);
             localStorage.setItem('calData', JSON.stringify(logs));
-            updateUI(true);
+            updateUI();
         }
 
         function updateUI(refreshList = true) {
-            const today = new Date().toISOString().split('T')[0];
-            const todayLogs = logs.filter(l => l.date === today);
-            const total = todayLogs.reduce((s, l) => s + l.cals, 0);
+            const dStr = viewDate.toISOString().split('T')[0];
+            const isToday = dStr === new Date().toISOString().split('T')[0];
+            
+            document.getElementById('displayDate').innerText = isToday ? "Today" : viewDate.toLocaleDateString(undefined, {month:'short', day:'numeric'});
+            
+            const dayLogs = logs.filter(l => l.date === dStr);
+            const total = dayLogs.reduce((s, l) => s + l.cals, 0);
 
-            document.getElementById('calsConsumed').innerText = total;
+            document.getElementById('totalCals').innerText = total;
             document.getElementById('goalInput').value = dailyGoal;
             
-            const percent = Math.min((total / dailyGoal) * 100, 100);
-            const bar = document.getElementById('progressBar');
-            bar.style.width = percent + '%';
-            bar.style.backgroundColor = total > dailyGoal ? 'var(--danger)' : 'var(--primary)';
+            const perc = Math.min((total / dailyGoal) * 100, 100);
+            const bar = document.getElementById('barFill');
+            bar.style.width = perc + '%';
+            bar.style.background = total > dailyGoal ? 'var(--danger)' : 'var(--primary)';
 
-            if (!refreshList) return;
-            const list = document.getElementById('historyList');
-            list.innerHTML = '';
+            if(!refreshList) return;
+            const cont = document.getElementById('historyContainer');
+            cont.innerHTML = '';
 
-            const categories = ["Breakfast", "Lunch", "Dinner", "Snack"];
-            categories.forEach(cat => {
-                const catLogs = todayLogs.filter(l => l.type === cat);
-                if (catLogs.length > 0) {
-                    let section = `<div class="meal-group"><div class="meal-group-header">${cat}</div>`;
-                    catLogs.forEach(item => {
-                        section += `
-                            <div class="history-item">
-                                <span class="item-name" onclick="editEntry(${item.id})">${item.name}</span>
-                                <div class="item-right">
-                                    <span class="item-cals">${item.cals}</span>
-                                    <button class="delete-btn" onclick="deleteEntry(${item.id})">×</button>
+            ["Breakfast", "Lunch", "Dinner", "Snack"].forEach(cat => {
+                const group = dayLogs.filter(l => l.type === cat);
+                if(group.length > 0) {
+                    let html = `<div class="meal-header">${cat}</div>`;
+                    group.forEach(item => {
+                        html += `
+                            <div class="history-row">
+                                <div style="flex:1; min-width:0;" onclick="editEntry(${item.id})">
+                                    <div class="row-name" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.name}</div>
+                                </div>
+                                <div class="row-right">
+                                    <span class="row-cals">${item.cals}</span>
+                                    <button class="del-x" onclick="deleteEntry(${item.id})">×</button>
                                 </div>
                             </div>`;
                     });
-                    list.innerHTML += section + `</div>`;
+                    cont.innerHTML += html;
                 }
             });
-            
-            if (todayLogs.length === 0) list.innerHTML = '<p style="color:#8E8E93; text-align:center; font-size:14px; padding:10px;">No meals logged today.</p>';
+            if(dayLogs.length === 0) cont.innerHTML = `<div style="text-align:center; color:#8E8E93; margin-top:40px; font-size:14px;">No logs for this date.</div>`;
         }
 
         updateUI();
