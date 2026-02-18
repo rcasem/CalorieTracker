@@ -6,35 +6,39 @@
     <title>CalorieTracker Pro</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1"></script>
     <style>
-        :root { --bg: #f0f2f5; --card: #ffffff; --primary: #34d399; --danger: #ef4444; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 15px; padding-bottom: 50px; }
-        .card { background: var(--card); padding: 20px; border-radius: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 15px; }
-        
-        /* Progress Bar Styles */
-        .progress-container { width: 100%; background: #eee; border-radius: 10px; height: 20px; margin: 10px 0; overflow: hidden; }
-        #progressBar { height: 100%; width: 0%; background: var(--primary); transition: width 0.5s ease-in-out; }
-        .stats-text { display: flex; justify-content: space-between; font-size: 14px; font-weight: bold; margin-bottom: 5px; }
+        :root { --bg: #f0f2f5; --card: #ffffff; --text: #1f2937; --primary: #34d399; --danger: #ef4444; --border: #e5e7eb; }
+        [data-theme="dark"] { --bg: #111827; --card: #1f2937; --text: #f9fafb; --border: #374151; }
 
-        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #e5e7eb; border-radius: 10px; font-size: 16px; box-sizing: border-box; }
-        button { width: 100%; background: var(--primary); color: white; border: none; padding: 14px; border-radius: 10px; font-weight: bold; font-size: 16px; margin-top: 5px; }
-        .entry { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f3f4f6; font-size: 14px; }
-        #chartContainer { height: 200px; width: 100%; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; padding-bottom: 50px; transition: 0.3s; }
+        .card { background: var(--card); padding: 20px; border-radius: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid var(--border); }
+        
+        .progress-container { width: 100%; background: #eee; border-radius: 10px; height: 16px; margin: 10px 0; overflow: hidden; }
+        #progressBar { height: 100%; width: 0%; background: var(--primary); transition: width 0.5s ease-in-out; }
+        
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid var(--border); border-radius: 10px; font-size: 16px; box-sizing: border-box; background: var(--card); color: var(--text); }
+        button { width: 100%; background: var(--primary); color: white; border: none; padding: 14px; border-radius: 10px; font-weight: bold; font-size: 16px; margin-top: 5px; cursor: pointer; }
+        .btn-alt { background: #6366f1; margin-top: 10px; }
+        .btn-danger { background: var(--danger); margin-top: 20px; font-size: 12px; }
+
+        .entry { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); }
+        #chartContainer { height: 200px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
+    <div class="header">
+        <h2 style="margin:0">Tracker</h2>
+        <button onclick="toggleTheme()" style="width:auto; padding: 8px 15px; font-size: 12px;">🌓 Theme</button>
+    </div>
+
     <div class="card">
-        <h3>Today's Progress</h3>
-        <div class="stats-text">
+        <div style="display:flex; justify-content:space-between; font-weight:bold;">
             <span id="calsLeft">Remaining: 2000</span>
             <span id="percentText">0%</span>
         </div>
-        <div class="progress-container">
-            <div id="progressBar"></div>
-        </div>
-        <p style="font-size: 12px; color: #666; text-align: center;">Goal: <span id="goalDisplay">2000</span> kcal</p>
+        <div class="progress-container"><div id="progressBar"></div></div>
     </div>
 
     <div class="card">
@@ -44,15 +48,17 @@
 
     <div class="card">
         <h3>Log Meal</h3>
-        <input type="text" id="foodName" placeholder="What did you eat?">
+        <input type="text" id="foodName" placeholder="Food Name">
         <input type="number" id="calories" placeholder="Calories" inputmode="numeric">
-        <button onclick="addEntry()">Add to Today</button>
+        <button onclick="addEntry()">Add Entry</button>
     </div>
 
     <div class="card">
-        <h3>Settings</h3>
-        <input type="number" id="goalInput" placeholder="Set Daily Goal (e.g. 2000)" onchange="updateGoal(this.value)">
-        <button onclick="clearLocalStorage()" style="background: #ef4444; margin-top: 20px; font-size: 12px; padding: 8px;">Reset All Data</button>
+        <h3>Settings & Data</h3>
+        <label>Daily Goal:</label>
+        <input type="number" id="goalInput" onchange="updateGoal(this.value)">
+        <button class="btn-alt" onclick="exportToCSV()">📥 Download CSV Export</button>
+        <button class="btn-danger" onclick="clearLocalStorage()">Reset All Data</button>
     </div>
 
     <script>
@@ -60,57 +66,56 @@
         let dailyGoal = localStorage.getItem('calGoal') || 2000;
         let myChart;
 
+        // --- Theme Logic ---
+        if(localStorage.getItem('theme') === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+        function toggleTheme() {
+            let current = document.documentElement.getAttribute('data-theme');
+            let target = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', target);
+            localStorage.setItem('theme', target);
+            renderChart(); // Refresh chart colors
+        }
+
+        // --- Core Logic ---
         function updateGoal(val) {
-            if (val > 0) {
-                dailyGoal = val;
-                localStorage.setItem('calGoal', val);
-                updateUI();
-            }
+            dailyGoal = val;
+            localStorage.setItem('calGoal', val);
+            updateUI();
         }
 
         function addEntry() {
-            const name = document.getElementById('foodName').value || "Unnamed Meal";
+            const name = document.getElementById('foodName').value || "Meal";
             const cals = parseInt(document.getElementById('calories').value);
-            const date = new Date().toISOString().split('T')[0];
-
-            if (cals) {
-                logs.push({ name, cals, date });
-                localStorage.setItem('calData', JSON.stringify(logs));
-                document.getElementById('foodName').value = '';
-                document.getElementById('calories').value = '';
-                updateUI();
-            }
+            if (!cals) return;
+            logs.push({ name, cals, date: new Date().toISOString().split('T')[0] });
+            localStorage.setItem('calData', JSON.stringify(logs));
+            document.getElementById('foodName').value = '';
+            document.getElementById('calories').value = '';
+            updateUI();
         }
 
         function updateUI() {
             const today = new Date().toISOString().split('T')[0];
-            const todayTotal = logs.filter(log => log.date === today).reduce((sum, log) => sum + log.cals, 0);
-            
-            // Update Progress Bar
+            const todayTotal = logs.filter(l => l.date === today).reduce((s, l) => s + l.cals, 0);
             const percent = Math.min((todayTotal / dailyGoal) * 100, 100);
-            const bar = document.getElementById('progressBar');
-            bar.style.width = percent + '%';
-            bar.style.background = todayTotal > dailyGoal ? '#ef4444' : '#34d399';
             
+            document.getElementById('progressBar').style.width = percent + '%';
+            document.getElementById('progressBar').style.background = todayTotal > dailyGoal ? 'var(--danger)' : 'var(--primary)';
             document.getElementById('calsLeft').innerText = `Remaining: ${Math.max(dailyGoal - todayTotal, 0)}`;
             document.getElementById('percentText').innerText = Math.round((todayTotal / dailyGoal) * 100) + '%';
-            document.getElementById('goalDisplay').innerText = dailyGoal;
             document.getElementById('goalInput').value = dailyGoal;
-
             renderChart();
         }
 
         function renderChart() {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
             const ctx = document.getElementById('myChart').getContext('2d');
             const last7Days = [...Array(7)].map((_, i) => {
-                const d = new Date();
-                d.setDate(d.getDate() - i);
+                const d = new Date(); d.setDate(d.getDate() - i);
                 return d.toISOString().split('T')[0];
             }).reverse();
 
-            const totalsByDay = last7Days.map(date => {
-                return logs.filter(log => log.date === date).reduce((sum, log) => sum + log.cals, 0);
-            });
+            const totals = last7Days.map(d => logs.filter(l => l.date === d).reduce((s, l) => s + l.cals, 0));
 
             if (myChart) myChart.destroy();
             myChart = new Chart(ctx, {
@@ -119,40 +124,37 @@
                     labels: last7Days.map(d => d.slice(5)),
                     datasets: [{
                         label: 'Calories',
-                        data: totalsByDay,
-                        backgroundColor: totalsByDay.map(v => v > dailyGoal ? '#ef4444' : '#34d399'),
+                        data: totals,
+                        backgroundColor: totals.map(v => v > dailyGoal ? '#ef4444' : '#34d399'),
                         borderRadius: 5
                     }]
                 },
                 options: { 
                     maintainAspectRatio: false,
-                    plugins: {
-                        annotation: {
-                            annotations: {
-                                line1: {
-                                    type: 'line',
-                                    yMin: dailyGoal,
-                                    yMax: dailyGoal,
-                                    borderColor: 'orange',
-                                    borderWidth: 2,
-                                    borderDash: [5, 5],
-                                    label: { content: 'Goal', display: true }
-                                }
-                            }
-                        }
-                    }
+                    scales: { 
+                        x: { grid: { display: false }, ticks: { color: isDark ? '#fff' : '#666' } },
+                        y: { ticks: { color: isDark ? '#fff' : '#666' } }
+                    },
+                    plugins: { legend: { display: false } }
                 }
             });
         }
 
-        function clearLocalStorage() {
-            if(confirm("Delete everything?")) {
-                localStorage.clear();
-                logs = [];
-                updateUI();
-            }
+        // --- Export CSV ---
+        function exportToCSV() {
+            let csvContent = "data:text/csv;charset=utf-8,Date,Food,Calories\n";
+            logs.forEach(row => {
+                csvContent += `${row.date},${row.name},${row.cals}\n`;
+            });
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "my_calories.csv");
+            document.body.appendChild(link);
+            link.click();
         }
 
+        function clearLocalStorage() { if(confirm("Delete all history?")) { localStorage.clear(); location.reload(); } }
         updateUI();
     </script>
 </body>
